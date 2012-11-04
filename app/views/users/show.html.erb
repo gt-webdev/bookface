@@ -1,17 +1,36 @@
 <h1><%= @user.first_name %> <%= @user.last_name %></h1>
 
-<%= form_for [current_user, @status] do |f| %>
-  <%= f.label 'status' %>
-  <%= f.text_field :text %>
+<% if current_user && current_user.id == params[:id].to_i %>
+  <%= form_for [current_user, @status] do |f| %>
+    <%= f.label 'status' %>
+    <%= f.text_field :text %>
 
-  <%= f.submit %>
+    <%= f.submit %>
 
+  <% end %>
 <% end %>
 
 <ul>
-<% @statuses.each do |status| %>
-  <li><%= status.text %>
-  <%= link_to "DELETE", user_status_path(user_id: current_user, id: status), method: :delete %>
-  </li>
-<% end %>
+  <% @statuses.each do |status| %>
+    <li><%= status.text %> <span class="likes">+<%= status.likes.size %></span>
+    <% unless status.likes.find_by_user_id(current_user) %>
+      <%= link_to "Like", status_likes_path(status), method: :post %>
+    <% else %>
+      <%= link_to "UNLike", like_path(status.likes.find_by_user_id(current_user)), method: :delete %>
+    <% end %>
+    <%= link_to "DELETE", status_path(status), method: :delete %>
+    <% status.comments.each do |comment| %>
+      <div class='comment'>
+        <p><%= link_to comment.user.full_name, user_path(comment.user) %> <%= comment.text %></p>
+      </div>
+    <% end %>
+    <div class='comment_form'>
+      <%= form_for [status, status.comments.build] do |f| %>
+        <%= f.label 'comment' %>
+        <%= f.text_field :text %>
+        <%= f.submit 'post' %>
+      <% end %>
+    </div>
+    </li>
+  <% end %>
 </ul>

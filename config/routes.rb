@@ -1,7 +1,10 @@
 Bookface::Application.routes.draw do
   devise_for :users
   resources :users, only: [:show, :index] do
-    resources :statuses, only: [:create, :destroy]
+    resources :statuses, only: [:create, :destroy], shallow: true do
+      resources :likes, only: [:create, :destroy]
+      resources :comments, only: [:create]
+    end
   end
   root :to => 'users#index'
 
